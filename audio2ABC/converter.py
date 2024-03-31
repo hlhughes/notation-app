@@ -3,7 +3,7 @@ import sys
 import os
 
 if len(sys.argv) != 2:
-    print("")
+    print("Please RUN: python converter.py <input wav file path>")
     sys.exit(1)
 
 wav_file_path = sys.argv[1]
