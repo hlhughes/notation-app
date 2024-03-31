@@ -1,46 +1,28 @@
-import aubio
-import numpy as np
+import subprocess
+import sys
+import os
 
-def wav_to_abc(wav_file, abc_file):
-    # Parameters for pitch detection
-    samplerate, win_s, hop_s = 44100, 1024, 512
-    aubio_source = aubio.source(wav_file, samplerate, hop_s)
-    samplerate = aubio_source.samplerate
-    pitch_o = aubio.pitch("default", win_s, hop_s, samplerate)
-    pitch_o.set_unit("midi")
-    pitch_o.set_tolerance(0.8)
+if len(sys.argv) != 2:
+    print("")
+    sys.exit(1)
 
-    notes = []
-    previous_pitch = 0
-    # Read and analyze audio file
-    while True:
-        samples, read = aubio_source()
-        pitch = pitch_o(samples)[0]
-        # Consider a note change if the pitch changes significantly (more than 1 MIDI note)
-        if abs(pitch - previous_pitch) > 1:
-            print(f"pitch = {pitch}")
-            midi_note = int(pitch)
-            note = midi_to_abc(midi_note)
-            print(f"abc note = {note}")
-            if note:  # If a valid note is detected
-                notes.append(note)
-            previous_pitch = pitch
-        if read < hop_s: break
+wav_file_path = sys.argv[1]
+# abc_file = sys.argv[2]
 
-    # Write notes to ABC file
-    notes_sequence = " ".join(notes)
-    with open(abc_file, 'w') as f:
-        f.write(f"X:1\nT:Extracted Melody\nM:4/4\nL:1/4\nK:C\n{notes_sequence}\n")
+# wav_file = "./piano_notes/" + temp + ".wav"
 
-def midi_to_abc(midi_note):
-    # Map MIDI note numbers to ABC notation
-    print(f"midi note = {midi_note}")
-    notes = "C D E F G A B".split()
-    note_names = ["C", "_D", "D", "_E", "E", "F", "_G", "G", "_A", "A", "_B", "B"]
-    note_index = midi_note % len(note_names)
-    octave = midi_note // 12 - 5  # MIDI octave 5 is considered octave 0 in ABC
-    abc_note = note_names[note_index] + (octave * "'")
-    return abc_note
+filename = os.path.splitext(os.path.basename(wav_file_path))[0]
+print(filename)
 
-if __name__ == "__main__":
-    wav_to_abc("./piano_notes/combined.wav", "output.abc")
+# Define the command you want to run
+command_1 = "basic-pitch './output' " + wav_file_path
+command_2 = "find ./output/" + filename + "_basic_pitch.mid -type f -exec  midi2abc {} -o {}.abc \;"
+
+print(f"./output/{filename}_basic_pitch.mid")
+# wav to midi 
+result1 = subprocess.run(command_1, shell=True, capture_output=True, text=True)
+
+
+# midi to abc
+result2 = subprocess.run(command_2, shell=True, capture_output=True, text=True)
+
