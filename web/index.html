@@ -1,0 +1,50 @@
+<!-- http://localhost:8000/yourhtmlfile.html -->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ABC to Sheet Music Converter</title>
+    <script src="abcjs-basic-min.js"></script>
+</head>
+<body>
+    <h1>ABC to Sheet Music Converter</h1>
+    <!-- Input for the filename -->
+    <input type="text" id="filenameInput" placeholder="Enter file name here">
+    <!-- Convert button -->
+    <button id="convertButton">Convert</button>
+    <div id="abcContent"></div>
+    <div id="paper"></div>
+
+    <script>
+        document.getElementById('convertButton').addEventListener('click', function() {
+            const filename = document.getElementById('filenameInput').value;
+            if (!filename) {
+                alert('Please enter a file name.');
+                return;
+            }
+
+            const filePath = "./output/" + filename; // Assuming the file is in the same directory
+
+            fetch(filePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('File not found: ' + filePath);
+                    }
+                    return response.text();
+                })
+                .then(abcContent => {
+                    const formattedString = abcContent.replace(/\n/g, "<br>");
+                    document.getElementById('abcContent').innerHTML = formattedString;
+                    
+                    // Use ABCJS to render the ABC content into sheet music
+                    ABCJS.renderAbc("paper", abcContent);
+                })
+                .catch(error => {
+                    console.error('Error fetching the file: ', error);
+                    document.getElementById('abcContent').textContent = 'Error loading the file.';
+                });
+        });
+    </script>
+</body>
+</html>
