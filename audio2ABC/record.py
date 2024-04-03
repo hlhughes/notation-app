@@ -1,42 +1,44 @@
 import pyaudio
 import wave
+import time
 
-# Parameters for audio recording
-FORMAT = pyaudio.paInt16
-CHANNELS = 1
-RATE = 44100
-CHUNK = 1024
-RECORD_SECONDS = 5
-WAVE_OUTPUT_FILENAME = "output.wav"
+def record_audio(wav_filename, record_seconds=5, chunk_size=1024, sample_format=pyaudio.paInt16, channels=2, fs=44100):
+    p = pyaudio.PyAudio()  # Create an interface to PortAudio
 
-audio = pyaudio.PyAudio()
+    print(f'Recording {wav_filename}')
 
-# Open microphone for recording
-stream = audio.open(format=FORMAT, channels=CHANNELS,
-                    rate=RATE, input=True,
-                    frames_per_buffer=CHUNK)
+    stream = p.open(format=sample_format,
+                    channels=channels,
+                    rate=fs,
+                    frames_per_buffer=chunk_size,
+                    input=True)
 
-print("Recording...")
+    frames = []  # Initialize array to store frames
 
-frames = []
+    # Store data in chunks for 5 seconds
+    for _ in range(0, int(fs / chunk_size * record_seconds)):
+        data = stream.read(chunk_size)
+        frames.append(data)
 
-# Record audio from microphone
-for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-    data = stream.read(CHUNK)
-    frames.append(data)
+    # Stop and close the stream 
+    stream.stop_stream()
+    stream.close()
+    # Terminate the PortAudio interface
+    p.terminate()
 
-print("Finished recording.")
+    print('Finished recording')
 
-# Stop and close the stream
-stream.stop_stream()
-stream.close()
-audio.terminate()
-
-# Write recorded audio to WAV file
-with wave.open(WAVE_OUTPUT_FILENAME, 'wb') as wf:
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(audio.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
+    # Save the recorded data as a WAV file
+    wf = wave.open(wav_filename, 'wb')
+    wf.setnchannels(channels)
+    wf.setsampwidth(p.get_sample_size(sample_format))
+    wf.setframerate(fs)
     wf.writeframes(b''.join(frames))
+    wf.close()
 
-print("Audio saved as:", WAVE_OUTPUT_FILENAME)
+if __name__ == '__main__':
+    i = 1  # Initialize the counter for the filename
+    while True:
+        filename = f"./piano_notes/sample_{i}.wav"
+        record_audio(filename)
+        i += 1  # Increment the counter for the next filename

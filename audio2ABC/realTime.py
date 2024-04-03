@@ -74,7 +74,7 @@ def update_abc(wav_file_path, first):
 
     abc_data += get_abc_notes(midi_data)
 
-    with open(f"./output/realTimeRes.abc", "a") as abc_file:
+    with open(f"./output/realTime.abc", "a") as abc_file:
         abc_file.write(abc_data)
 
 ################# Main #################
