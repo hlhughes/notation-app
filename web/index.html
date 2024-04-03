@@ -1,6 +1,3 @@
-<!-- http://localhost:8000/yourhtmlfile.html -->
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,22 +6,12 @@
 </head>
 <body>
     <h1>ABC to Sheet Music Converter</h1>
-    <!-- Input for the filename -->
-    <input type="text" id="filenameInput" placeholder="Enter file name here">
-    <!-- Convert button -->
-    <button id="convertButton">Convert</button>
     <div id="abcContent"></div>
     <div id="paper"></div>
 
     <script>
-        document.getElementById('convertButton').addEventListener('click', function() {
-            const filename = document.getElementById('filenameInput').value;
-            if (!filename) {
-                alert('Please enter a file name.');
-                return;
-            }
-
-            const filePath = "../audio2ABC/output/" + filename; // Assuming the file is in the same directory
+        function updateSheetMusic() {
+            const filePath = "../audio2ABC/output/realTimeRes.abc"; // Path to the specific ABC file
 
             fetch(filePath)
                 .then(response => {
@@ -36,15 +23,21 @@
                 .then(abcContent => {
                     const formattedString = abcContent.replace(/\n/g, "<br>");
                     document.getElementById('abcContent').innerHTML = formattedString;
-                    
+
                     // Use ABCJS to render the ABC content into sheet music
                     ABCJS.renderAbc("paper", abcContent);
                 })
                 .catch(error => {
                     console.error('Error fetching the file: ', error);
-                    document.getElementById('abcContent').textContent = 'Error loading the file.';
+                    // Handle the error (e.g., display an error message)
                 });
-        });
+        }
+
+        // Update the sheet music every 5 seconds
+        setInterval(updateSheetMusic, 500);
+
+        // Also update the sheet music when the page loads
+        document.addEventListener('DOMContentLoaded', updateSheetMusic);
     </script>
 </body>
 </html>

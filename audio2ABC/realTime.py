@@ -1,6 +1,7 @@
 import sys
 import pretty_midi
 import os
+import time
 
 
 import tensorflow as tf
@@ -9,16 +10,12 @@ from basic_pitch.inference import predict, Model
 from basic_pitch import ICASSP_2022_MODEL_PATH
 
 if len(sys.argv) != 2:
-    print("Please RUN: python converter.py <input wav file path>")
+    print("Please RUN: python realTime.py <input wav file dir>")
     sys.exit(1)
 
 wav_file_dir = sys.argv[1]
 
 basic_pitch_model = Model(ICASSP_2022_MODEL_PATH)
-
-input_file_list = ['combined_piano_notes.wav', 'combined.wav']
-
-abc_data = "" 
 
 #----------------------------------------------------------------------------------
 
@@ -30,7 +27,7 @@ def get_abc_metadata(midi_data, filename):
     abc_metadata_text += "X: 1\n"
     
     # Set the title (T)
-    abc_metadata_text += f"T: from {filename}\n"
+    abc_metadata_text += f"T: Real Time Sheet Music\n"
     
     # Set the time signature (M)
     abc_metadata_text += "M: 4/4\n"
@@ -63,18 +60,47 @@ def get_abc_notes(midi_data):
     
     return note_str
 
-for i in range(len(input_file_list)):
-    wav_file_path = f"{wav_file_dir}/{input_file_list[i]}"
+def update_abc(wav_file_path, first):
+    abc_data = "" 
+
     model_output, midi_data, note_events = predict(
         wav_file_path,
         basic_pitch_model,
     )
 
-    filename = os.path.splitext(os.path.basename(input_file_list[i]))[0]
-    if(i == 0):
+    filename = os.path.splitext(os.path.basename(wav_file_path))[0]
+    if(first):
         abc_data = get_abc_metadata(midi_data, filename)
 
     abc_data += get_abc_notes(midi_data)
 
-    with open("./output/output.abc", "w") as abc_file:
+    with open(f"./output/realTimeRes.abc", "a") as abc_file:
         abc_file.write(abc_data)
+
+################# Main #################
+
+# if __name__ == '__main__':
+
+idx = 1 # this is the input file index, increased from 1
+
+while True:
+    print(f"Running sample_{idx}.wav")
+    file_path = f"{wav_file_dir}/sample_{idx}.wav"
+
+    while not os.path.exists(file_path):
+        print("sleep")
+        time.sleep(3)
+
+    print("wake up")
+    # now sample_idx.wav exist
+    if idx == 1:
+        update_abc(file_path, True)
+    else:
+        update_abc(file_path, False)
+
+    idx += 1
+    time.sleep(2) # might need to change the duration
+
+
+
+
