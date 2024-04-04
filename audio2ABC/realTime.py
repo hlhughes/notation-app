@@ -17,6 +17,9 @@ wav_file_dir = sys.argv[1]
 
 basic_pitch_model = Model(ICASSP_2022_MODEL_PATH)
 
+with open(f"./output/realTime.abc", "w") as abc_file:
+    pass
+
 #----------------------------------------------------------------------------------
 
 
@@ -53,12 +56,43 @@ def get_abc_notes(midi_data):
         # Iterate through each note in the instrument
         for note in instrument.notes:
             # Format the note information in ABC format and append to the ABC data
-            note_str += f"{pretty_midi.note_number_to_name(note.pitch)} " #{int(note.start*1000)}{int(note.end*1000)}
+            # note_str += f"{pretty_midi.note_number_to_name(note.pitch)} " #{int(note.start*1000)}{int(note.end*1000)}
+            note_str += f"{pitchToAbc(note)} "
+
+            note_info = ""
+            note_info += f"Pitch: {note.pitch}\n"
+            note_info += f"Start: {note.start}\n"
+            note_info += f"End: {note.end}\n"
+            note_info += f"Computed abc:{pitchToAbc(note)}\n"
+            note_info += "--------\n"
+            print(note_info)
         
         # End the current voice
         note_str += "| "
     
     return note_str
+
+def pitchToAbc(note):
+    Notes = ["C", "^D", "D", "^E", "E", "F", "^G", "G", "^A", "A", "^B", "B"]
+    note_name = Notes[note.pitch % len(Notes)]
+
+    if 72 <= note.pitch <= 83:
+        note_name = note_name.lower()
+
+    if (note.pitch >= 84):
+        octaves = int(note.pitch / len(Notes)) - 6
+        for i in range(octaves):
+            note_name += "'"
+    elif (note.pitch <= 59):
+        octaves = abs(int(note.pitch / len(Notes)) - 5)
+        for i in range(octaves):
+            note_name += ","
+    return note_name
+
+
+    
+    
+
 
 def update_abc(wav_file_path, first):
     abc_data = "" 
