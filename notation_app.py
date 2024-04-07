@@ -2,10 +2,12 @@ from multiprocessing import Process
 
 import record
 import realTime
+from basic_pitch.inference import predict, Model
+from basic_pitch import ICASSP_2022_MODEL_PATH
 
 if __name__ == '__main__':
 
-    p1 = Process(target=record.record_loop)
+    p1 = Process(target=record.main)
     p1.start()
     print("p1, record started")
     
