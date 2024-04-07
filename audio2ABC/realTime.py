@@ -9,6 +9,8 @@ import tensorflow as tf
 from basic_pitch.inference import predict, Model
 from basic_pitch import ICASSP_2022_MODEL_PATH
 
+
+bpm = 160
 if len(sys.argv) != 2:
     print("Please RUN: python realTime.py <input wav file dir>")
     sys.exit(1)
@@ -39,7 +41,8 @@ def get_abc_metadata(midi_data, filename):
     abc_metadata_text += "L: 1/8\n"
     
     # Set the tempo (Q)
-    tempo = f"1/4={int(midi_data.estimate_tempo() * 2)}"
+    bpm = int(midi_data.estimate_tempo())
+    tempo = f"1/4={bpm}"
     abc_metadata_text += f"Q: {tempo}\n"
     
     # Set the key signature (K)
@@ -57,15 +60,24 @@ def get_abc_notes(midi_data):
         for note in instrument.notes:
             # Format the note information in ABC format and append to the ABC data
             # note_str += f"{pretty_midi.note_number_to_name(note.pitch)} " #{int(note.start*1000)}{int(note.end*1000)}
-            note_str += f"{pitchToAbc(note)} "
+            note_str += f"{pitchToAbc(note)}"
+
+            note_rhythm = convertRhythm(note)
+            if note_rhythm != "null":
+                note_str += note_rhythm
+
+            note_str += " "
 
             note_info = ""
             note_info += f"Pitch: {note.pitch}\n"
-            note_info += f"Start: {note.start}\n"
-            note_info += f"End: {note.end}\n"
-            note_info += f"Computed abc:{pitchToAbc(note)}\n"
+            note_info += f"Start: {note.start}s\n"
+            note_info += f"Duration: {note.end - note.start}s\n"
+            note_info += f"Computed abc: {pitchToAbc(note)}\n"
+            note_info += f"Computed Duration: {convertRhythm(note)}\n"
             note_info += "--------\n"
             print(note_info)
+
+
         
         # End the current voice
         note_str += "| "
@@ -88,6 +100,25 @@ def pitchToAbc(note):
         for i in range(octaves):
             note_name += ","
     return note_name
+
+def convertRhythm(note):
+    duration = note.end - note.start
+    unitDurationSeconds = 60.0 / bpm
+    Durations = [0, unitDurationSeconds / 2.0, unitDurationSeconds, unitDurationSeconds * 2.0, unitDurationSeconds * 4.0]
+    closest_duration = min(Durations, key=lambda x:abs(x-duration)) 
+
+    if closest_duration == 0:
+        return "null"
+    #elif closest_duration == unitDurationSeconds / 4.0:
+        #return "/4"
+    elif closest_duration == unitDurationSeconds / 2.0:
+        return "/2"
+    elif closest_duration == unitDurationSeconds:
+        return ""
+    elif closest_duration == unitDurationSeconds * 2.0:
+        return "2"
+    elif closest_duration == unitDurationSeconds * 4.0:
+        return "4"
 
 
     
