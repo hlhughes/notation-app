@@ -24,11 +24,25 @@
     </div>
 
     {% else %}
+
     <div class="buttons">
+      {% if recording == false %}
+
       <form method="post">
-        <input type="submit" value="Start Recording" id="record_btn" class="btn btn-success"> 
+        <input type="submit" value="Start Recording" id="start_record_btn" class="btn btn-success"> 
       </form>
+
+      {% else %}
+
+      <form method="post">
+        <input type="submit" value="Stop Recording" id="stop_record_btn" class="btn btn-danger"> 
+      </form>
+
+      {% endif %}
+
     </div>
+
+
     <div id="abcContent"></div>
     <div id="paper"></div>
     {% endif %}

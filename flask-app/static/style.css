@@ -9,7 +9,7 @@
     margin:auto;
 }
 
-#start_btn, #record_btn {
+#start_btn, #start_record_btn, #stop_record_btn {
     font-size:2em;
     padding:0.5em;
 }

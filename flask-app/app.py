@@ -28,6 +28,9 @@ def home():
             return render_template("index.html", model_loaded=model_loaded, recording=recording)
         else:
             if not recording:
+
+                #Start the multithread stuff here
+
                 realTime.reset()
 
                 p1 = Thread(target=record_lib.record_loop)
@@ -42,6 +45,7 @@ def home():
                 #p2.join()
                 #print("processes done")
             else:
+                #Somehow stop them
                 print("Stop threads somehow")
                 
             recording = not recording
