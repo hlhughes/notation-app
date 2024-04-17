@@ -3,7 +3,7 @@ import wave
 import threading
 from basic_pitch.inference import predict, Model
 from basic_pitch import ICASSP_2022_MODEL_PATH
-import time
+import os
 
 from midi2abc import update_abc
 
@@ -21,10 +21,12 @@ def predict2abc():
             cv.wait()
 
         model_output, midi_data, note_events = predict('temp.wav', basic_pitch_model)
+        already_predicted = True
         mx.release()
-    
-        # here do midi 2 abc & update abc file that is displayed on the webpage
-        update_abc(midi_data)
+
+        midi_data.write('EasyABC/temp.mid')
+        os.system('python midi2abc.py -f EasyABC/temp.mid -o EasyABC/temp.abc')
+        
 
 
 def record():
