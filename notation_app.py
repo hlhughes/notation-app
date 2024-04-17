@@ -5,16 +5,15 @@ from basic_pitch.inference import predict, Model
 from basic_pitch import ICASSP_2022_MODEL_PATH
 import os
 
-from midi2abc import update_abc
-
 mx = threading.Lock()
 cv = threading.Condition(mx)
-already_predicted = True
 
 def predict2abc():
+    global already_predicted
     print("predict2abc")
 
     basic_pitch_model = Model(ICASSP_2022_MODEL_PATH)
+
     while True: # this should be changed to a condition that checks the user stopped recording
         mx.acquire()
         if (already_predicted):
@@ -24,12 +23,14 @@ def predict2abc():
         already_predicted = True
         mx.release()
 
-        midi_data.write('EasyABC/temp.mid')
-        os.system('python midi2abc.py -f EasyABC/temp.mid -o EasyABC/temp.abc')
+        midi_data.write('temp.mid')
+        # input file, then output file
+        os.system('python EasyABC/midi2abc.py -f temp.mid -o output/realTime.abc')
         
 
 
 def record():
+    global already_predicted
     print("record")
     i = 0
     p = pyaudio.PyAudio()
@@ -54,7 +55,6 @@ def record():
             data = stream.read(chunk_size)
             frames.append(data)
 
-        #wav_filename = f"./piano_notes/sample_{i}.wav"
         wav_filename = "temp.wav"
 
         print(f"Writing to {wav_filename}")
@@ -85,7 +85,8 @@ def record():
 def main():
     # create two threads, one for recording, one for converting to abc
     print("main")
-    
+    global already_predicted
+    already_predicted = True
     x = threading.Thread(target=record)
     y = threading.Thread(target=predict2abc)
 
