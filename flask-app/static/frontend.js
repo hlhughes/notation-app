@@ -21,6 +21,11 @@ const filePath = "./static/realTime.abc"; // Path to the specific ABC file
                     // make the activate-audio button visible if the content is not empty
                     if (abcContent.length > 0 && recording === null) {
                         startAudioButton.style.display = "inline";
+                        stopAudioButton.style.display = "inline";
+                    }
+                    else {
+                        startAudioButton.style.display = "none";
+                        stopAudioButton.style.display = "none";
                     }
                     
                     // Use ABCJS to render the ABC content into sheet music
@@ -29,15 +34,12 @@ const filePath = "./static/realTime.abc"; // Path to the specific ABC file
 
                     // This object is the class that will contain the buffer
                     var midiBuffer;
-                    /*
+                    
                     // This will play the synthesized audio
                     startAudioButton.addEventListener("click", function() {
 
-
-                        startAudioButton.setAttribute("style", "display:none;");
-
                         if (ABCJS.synth.supportsAudio()) {
-                            stopAudioButton.style.display = "inline";
+                            //stopAudioButton.style.display = "inline";
         
                             // An audio context is needed - this can be passed in for two reasons:
                             // 1) So that you can share this audio context with other elements on your page.
@@ -49,7 +51,7 @@ const filePath = "./static/realTime.abc"; // Path to the specific ABC file
                                 navigator.msAudioContext;
                             var audioContext = new window.AudioContext();
                             audioContext.resume().then(function () {
-                                statusDiv.innerHTML += "<div>AudioContext resumed</div>";
+                                //statusDiv.innerHTML += "<div>AudioContext resumed</div>";
                                 // In theory the AC shouldn't start suspended because it is being initialized in a click handler, but iOS seems to anyway.
         
                                 // This does a bare minimum so this object could be created in advance, or whenever convenient.
@@ -62,40 +64,40 @@ const filePath = "./static/realTime.abc"; // Path to the specific ABC file
                                     millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
                                 }).then(function (response) {
                                     console.log("Notes loaded: ", response)
-                                    statusDiv.innerHTML += "<div>Audio object has been initialized</div>";
+                                    //statusDiv.innerHTML += "<div>Audio object has been initialized</div>";
                                     // console.log(response); // this contains the list of notes that were loaded.
                                     // midiBuffer.prime actually builds the output buffer.
                                     return midiBuffer.prime();
                                 }).then(function (response) {
-                                    statusDiv.innerHTML += "<div>Audio object has been primed (" + response.duration + " seconds).</div>";
-                                    statusDiv.innerHTML += "<div>status = " + response.status + "</div>"
+                                    //statusDiv.innerHTML += "<div>Audio object has been primed (" + response.duration + " seconds).</div>";
+                                    //statusDiv.innerHTML += "<div>status = " + response.status + "</div>"
                                     // At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
                                     midiBuffer.start();
-                                    statusDiv.innerHTML += "<div>Audio started</div>";
+                                    //statusDiv.innerHTML += "<div>Audio started</div>";
                                     return Promise.resolve();
                                 }).catch(function (error) {
                                     if (error.status === "NotSupported") {
-                                        stopAudioButton.setAttribute("style", "display:none;");
+                                        //stopAudioButton.setAttribute("style", "display:none;");
                                         var audioError = document.querySelector(".audio-error");
-                                        audioError.setAttribute("style", "");
+                                        audioError.style.display = "inline";
                                     } else
                                         console.warn("synth error", error);
                                 });
                             });
                         } else {
                             var audioError = document.querySelector(".audio-error");
-                            audioError.setAttribute("style", "");
+                            audioError.style.display = "inline";
                         }
                     });
                     
                     stopAudioButton.addEventListener("click", function() {
-                        startAudioButton.setAttribute("style", "");
-                        explanationDiv.setAttribute("style", "");
-                        stopAudioButton.setAttribute("style", "display:none;");
+                        //startAudioButton.setAttribute("style", "");
+                        //explanationDiv.setAttribute("style", "");
+                        //stopAudioButton.setAttribute("style", "display:none;");
                         if (midiBuffer)
                             midiBuffer.stop();
                     });
-                    */
+                    
                     
                 })
                 .catch(error => {
