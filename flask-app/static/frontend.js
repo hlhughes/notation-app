@@ -14,13 +14,22 @@ const filePath = "./static/realTime.abc"; // Path to the specific ABC file
                     document.getElementById('abcContent').innerHTML = formattedString;
 
                     // Use ABCJS to render the ABC content into sheet music
-                    ABCJS.renderAbc("paper", abcContent);
+                    var visualObj = ABCJS.renderAbc("paper", abcContent, {
+                        responsive: "resize" })[0];
+
+                    			// This object is the class that will contain the buffer
+                    var midiBuffer;
+
+                    var startAudioButton = document.querySelector(".activate-audio");
+                    var stopAudioButton = document.querySelector(".stop-audio");
+                    
+                    
                 })
                 .catch(error => {
                     console.error('Error fetching the file: ', error);
                     // Handle the error (e.g., display an error message)
                 });
-        }
+}
 
         // Update the sheet music every 5 seconds
         setInterval(updateSheetMusic, 500);

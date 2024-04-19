@@ -11,8 +11,8 @@ cv = threading.Condition(mx)
 
 global_vars.recording = False
 
-
 def reset():
+    print("reset")
     if os.path.exists("temp.mid"):
         os.remove("temp.mid")
     if os.path.exists("temp.wav"):
@@ -22,6 +22,7 @@ def reset():
         pass
 
 def load_model():
+    print("load_model")
     return Model(ICASSP_2022_MODEL_PATH)
 
 def predict2abc(model):
@@ -41,14 +42,16 @@ def predict2abc(model):
 
         midi_data.write('temp.mid')
         # input file, then output file
+        print("calling EasyABC's midi2abc.py")
         os.system('python ../EasyABC/midi2abc.py -f temp.mid -o ./static/realTime.abc')
+
+    print("Finished predicting")
         
 
 
 def record():
     global already_predicted
     print("record")
-    i = 0
     p = pyaudio.PyAudio()
 
     fs = 44100  # Sample rate
@@ -67,17 +70,14 @@ def record():
 
     while global_vars.recording: # this should be changed to a condition that checks if the user wants to stop recording
         
-        for j in range(0, int(fs / chunk_size * 5)):
+        for _ in range(0, int(fs / chunk_size * 5)):
             data = stream.read(chunk_size)
             frames.append(data)
 
-        wav_filename = "temp.wav"
-
-        print(f"Writing to {wav_filename}")
+        print("Writing wav file")
         
         mx.acquire()
-
-        wf = wave.open(wav_filename, 'wb')
+        wf = wave.open("temp.wav", 'wb')
         wf.setnchannels(channels)
         wf.setsampwidth(p.get_sample_size(sample_format))
         wf.setframerate(fs)
@@ -88,7 +88,6 @@ def record():
         cv.notify()
         mx.release()
 
-        i += 1  # Increment the counter for the next filename
 
     print('Finished recording')
     # Stop and close the stream 
@@ -100,7 +99,7 @@ def record():
 
 def start(model):
     # create two threads, one for recording, one for converting to abc
-    print("main")
+    print("start")
     global already_predicted
     already_predicted = True
     x = threading.Thread(target=record)
@@ -111,6 +110,3 @@ def start(model):
 
     #x.join()
     #y.join()
-
-if __name__ == '__main__':
-    main()

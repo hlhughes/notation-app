@@ -473,6 +473,7 @@ def main(argv):
         open(output_filename, 'w').write(result)
     else:
         print(result)
+    print("wrote to realTime.abc")
 
 
 if __name__ == '__main__':

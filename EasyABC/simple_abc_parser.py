@@ -53,6 +53,8 @@ def get_best_key_for_midi_notes(notes):
         accidentals = get_accidentals_for_key(key)
         basic_notes_in_key = [x+y for x,y in zip(doremi2chromatic, accidentals)]
         penalty = len([note for note in notes if not note in basic_notes_in_key])
+        if len(notes) < 1:
+            return 'c'
         if notes[-1] != get_base_note_for_key(key):
             penalty += 2
         if key.endswith('dor'):
