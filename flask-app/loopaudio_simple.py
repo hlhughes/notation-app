@@ -12,7 +12,6 @@ import time
 # PyAudio Library
 import pyaudio
 
-
 class WavePlayerLoop(threading.Thread):
     CHUNK = 1024
 
@@ -62,12 +61,6 @@ class WavePlayerLoop(threading.Thread):
 
         player.terminate()
 
-    def play(self):
-        """
-        Just another name for self.start()
-        """
-        self.start()
-
     def stop(self):
         """
         Stop playback.
@@ -103,7 +96,7 @@ def main():
     global lastData
     serdata = 100
     exitCond = False
-    player.play()
+    player.run()
     lastData = time.time()
     
     global ser
