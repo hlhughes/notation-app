@@ -5,6 +5,7 @@ from basic_pitch.inference import predict, Model
 from basic_pitch import ICASSP_2022_MODEL_PATH
 import os
 import global_vars
+import loopaudio_simple
 
 mx = threading.Lock()
 cv = threading.Condition(mx)
@@ -50,6 +51,8 @@ def predict2abc(model):
 
 
 def record():
+    z = threading.Thread(target=loopaudio_simple)
+    z.start()
     global already_predicted
     print("record")
     p = pyaudio.PyAudio()
@@ -95,6 +98,7 @@ def record():
     stream.close()
     # Terminate the PortAudio interface
     p.terminate()
+    loopaudio_simple.exitCond = True
 
 
 def start(model):
