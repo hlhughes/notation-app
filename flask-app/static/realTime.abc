@@ -1,7 +1,5 @@
 X:1
 M:3/4
 L:1/16
-K:F#dor
-A,2F2E2^C2B,2 |B,2G,G,3B, B,3D4 |E2 E5G,2 | ^D=D2C2B,2<B,2b0[G3G,3] |
-^G,2A,3^F,2<=F,2F,10 |E2E4 |[B,B]B,3G,3CB,4 |^G4FE2E4 |
-C21 |F2 |^F=FGE3E9 | F5^G2^F3 |
+K:Em
+^C,6 | A,,8C,16 |C2D [dD]e2e3 E2C,10C9 | E |

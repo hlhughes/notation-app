@@ -1,3 +1,7 @@
+var midiBuffer;
+var visualObj;
+
+
 function updateSheetMusic() {
 const filePath = "./static/realTime.abc"; // Path to the specific ABC file
             
@@ -29,74 +33,12 @@ const filePath = "./static/realTime.abc"; // Path to the specific ABC file
                     }
                     
                     // Use ABCJS to render the ABC content into sheet music
-                    var visualObj = ABCJS.renderAbc("paper", abcContent, {
+                    visualObj = ABCJS.renderAbc("paper", abcContent, {
                         responsive: "resize" })[0];
 
                     // This object is the class that will contain the buffer
-                    var midiBuffer;
                     
-                    // This will play the synthesized audio
-                    startAudioButton.addEventListener("click", function() {
-
-                        if (ABCJS.synth.supportsAudio()) {
-                            //stopAudioButton.style.display = "inline";
-        
-                            // An audio context is needed - this can be passed in for two reasons:
-                            // 1) So that you can share this audio context with other elements on your page.
-                            // 2) So that you can create it during a user interaction so that the browser doesn't block the sound.
-                            // Setting this is optional - if you don't set an audioContext, then abcjs will create one.
-                            window.AudioContext = window.AudioContext ||
-                                window.webkitAudioContext ||
-                                navigator.mozAudioContext ||
-                                navigator.msAudioContext;
-                            var audioContext = new window.AudioContext();
-                            audioContext.resume().then(function () {
-                                //statusDiv.innerHTML += "<div>AudioContext resumed</div>";
-                                // In theory the AC shouldn't start suspended because it is being initialized in a click handler, but iOS seems to anyway.
-        
-                                // This does a bare minimum so this object could be created in advance, or whenever convenient.
-                                midiBuffer = new ABCJS.synth.CreateSynth();
-        
-                                // midiBuffer.init preloads and caches all the notes needed. There may be significant network traffic here.
-                                return midiBuffer.init({
-                                    visualObj: visualObj,
-                                    audioContext: audioContext,
-                                    millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
-                                }).then(function (response) {
-                                    console.log("Notes loaded: ", response)
-                                    //statusDiv.innerHTML += "<div>Audio object has been initialized</div>";
-                                    // console.log(response); // this contains the list of notes that were loaded.
-                                    // midiBuffer.prime actually builds the output buffer.
-                                    return midiBuffer.prime();
-                                }).then(function (response) {
-                                    //statusDiv.innerHTML += "<div>Audio object has been primed (" + response.duration + " seconds).</div>";
-                                    //statusDiv.innerHTML += "<div>status = " + response.status + "</div>"
-                                    // At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
-                                    midiBuffer.start();
-                                    //statusDiv.innerHTML += "<div>Audio started</div>";
-                                    return Promise.resolve();
-                                }).catch(function (error) {
-                                    if (error.status === "NotSupported") {
-                                        //stopAudioButton.setAttribute("style", "display:none;");
-                                        var audioError = document.querySelector(".audio-error");
-                                        audioError.style.display = "inline";
-                                    } else
-                                        console.warn("synth error", error);
-                                });
-                            });
-                        } else {
-                            var audioError = document.querySelector(".audio-error");
-                            audioError.style.display = "inline";
-                        }
-                    });
                     
-                    stopAudioButton.addEventListener("click", function() {
-                        //startAudioButton.setAttribute("style", "");
-                        //explanationDiv.setAttribute("style", "");
-                        //stopAudioButton.setAttribute("style", "display:none;");
-                        if (midiBuffer)
-                            midiBuffer.stop();
-                    });
                     
                     
                 })
@@ -106,9 +48,77 @@ const filePath = "./static/realTime.abc"; // Path to the specific ABC file
                 });
 }
 
+
         // Update the sheet music every 5 seconds
         setInterval(updateSheetMusic, 500);
 
         // Also update the sheet music when the page loads
         document.addEventListener('DOMContentLoaded', updateSheetMusic);
+
+
+
+// This will play the synthesized audio
+//startAudioButton.addEventListener("click", function() {
+$(".activate-audio").click(function() {
+
+    if (ABCJS.synth.supportsAudio()) {
+        //stopAudioButton.style.display = "inline";
+
+        // An audio context is needed - this can be passed in for two reasons:
+        // 1) So that you can share this audio context with other elements on your page.
+        // 2) So that you can create it during a user interaction so that the browser doesn't block the sound.
+        // Setting this is optional - if you don't set an audioContext, then abcjs will create one.
+        window.AudioContext = window.AudioContext ||
+            window.webkitAudioContext ||
+            navigator.mozAudioContext ||
+            navigator.msAudioContext;
+        var audioContext = new window.AudioContext();
+        audioContext.resume().then(function () {
+            //statusDiv.innerHTML += "<div>AudioContext resumed</div>";
+            // In theory the AC shouldn't start suspended because it is being initialized in a click handler, but iOS seems to anyway.
+
+            // This does a bare minimum so this object could be created in advance, or whenever convenient.
+            midiBuffer = new ABCJS.synth.CreateSynth();
+
+            // midiBuffer.init preloads and caches all the notes needed. There may be significant network traffic here.
+            return midiBuffer.init({
+                visualObj: visualObj,
+                audioContext: audioContext,
+                millisecondsPerMeasure: visualObj.millisecondsPerMeasure()
+            }).then(function (response) {
+                console.log("Notes loaded: ", response)
+                //statusDiv.innerHTML += "<div>Audio object has been initialized</div>";
+                // console.log(response); // this contains the list of notes that were loaded.
+                // midiBuffer.prime actually builds the output buffer.
+                return midiBuffer.prime();
+            }).then(function (response) {
+                //statusDiv.innerHTML += "<div>Audio object has been primed (" + response.duration + " seconds).</div>";
+                //statusDiv.innerHTML += "<div>status = " + response.status + "</div>"
+                // At this point, everything slow has happened. midiBuffer.start will return very quickly and will start playing very quickly without lag.
+                midiBuffer.start();
+                //statusDiv.innerHTML += "<div>Audio started</div>";
+                return Promise.resolve();
+            }).catch(function (error) {
+                if (error.status === "NotSupported") {
+                    //stopAudioButton.setAttribute("style", "display:none;");
+                    var audioError = document.querySelector(".audio-error");
+                    audioError.style.display = "inline";
+                } else
+                    console.warn("synth error", error);
+            });
+        });
+    } else {
+        var audioError = document.querySelector(".audio-error");
+        audioError.style.display = "inline";
+    }
+});
+
+//stopAudioButton.addEventListener("click", function() {
+$(".stop-audio").click(function() {
+    //startAudioButton.setAttribute("style", "");
+    //explanationDiv.setAttribute("style", "");
+    //stopAudioButton.setAttribute("style", "display:none;");
+    if (midiBuffer)
+        midiBuffer.stop();
+});
 
