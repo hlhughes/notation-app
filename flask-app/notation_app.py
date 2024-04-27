@@ -4,61 +4,11 @@ import threading
 from basic_pitch.inference import predict, Model
 from basic_pitch import ICASSP_2022_MODEL_PATH
 import os
+
 import global_vars
-import time
-import serial
 
 mx = threading.Lock()
 cv = threading.Condition(mx)
-
-serMx = threading.Lock()
-
-global_vars.recording = False
-
-def readserial(comport, baudrate):
-    global serdata
-
-    ser = serial.Serial(comport, baudrate, timeout=None, bytesize=serial.EIGHTBITS, xonxoff=False, rtscts=False, dsrdtr=False)
-
-    while True:
-        serMx.acquire()
-        serdata = int(ser.readline().decode().strip())
-        serMx.release()
-
-
-def loopaudio_simple():
-    
-    global serdata
-    serdata = 100
-
-    a = threading.Thread(target=readserial, args=('COM5', 115200))
-    a.start()
-    
-    CHUNK = 1024
-
-    # Open Wave File and start play!
-    wf = wave.open('drums.wav', 'rb')
-    player = pyaudio.PyAudio()
-
-    while global_vars.recording:
-        serMx.acquire()
-        ratio = serdata / 100
-        serMx.release()
-
-        # Open Output Stream (based on PyAudio tutorial)
-        stream = player.open(format=player.get_format_from_width(wf.getsampwidth()),
-                            channels=wf.getnchannels(),
-                            rate=int(ratio*wf.getframerate()),
-                            output=True)
-
-        # PLAYBACK LOOP
-        data = wf.readframes(CHUNK)
-        while data != b'':
-            stream.write(data)
-            data = wf.readframes(CHUNK)
-
-        wf.rewind()
-        stream.close()
 
 def reset():
     print("reset")
@@ -96,13 +46,7 @@ def predict2abc(model):
 
     print("Finished predicting")
         
-
-
 def record():
-
-
-    z = threading.Thread(target=loopaudio_simple)
-    z.start()
 
     global already_predicted
     print("record")
@@ -149,7 +93,6 @@ def record():
     stream.close()
     # Terminate the PortAudio interface
     p.terminate()
-    loopaudio_simple.exitCond = True
 
 
 def start(model):
@@ -162,6 +105,3 @@ def start(model):
 
     x.start()
     y.start()
-
-    #x.join()
-    #y.join()
